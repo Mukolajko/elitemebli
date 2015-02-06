@@ -1,0 +1,18 @@
+{
+  "name": "elitemebli",
+  "version": "1.0.0",
+  "description": "site for elite mebli firm",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "mykola borysiuk",
+  "license": "MIT",
+  "dependencies": {
+    "async": "^0.9.0",
+    "ejs": "^2.2.4",
+    "express": "~4.2.0",
+    "nodemailer": "1.0",
+    "nodemailer-smtp-transport": "0.1.12"
+  }
+}
