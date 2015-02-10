@@ -69,7 +69,6 @@ function sendForm() {
     if (errors == 0){
 		$("#return-content").bPopup().close();
         $.ajax({
-			type: 'POST',
 			url: '/sendmail',
 			data: {name: $("form input[name = 'name']").val(), phone: $("form input[name = 'phone']").val()},
 			success: function(responce) {

@@ -20,7 +20,7 @@ router.get('/popup/done', function (req, res) {
     res.render('popup-res', {message: msg});
 });
 
-router.post('/sendmail', function (req, res) {
+router.get('/sendmail', function (req, res) {
     var transport = nodeMailer.createTransport(smtpTransport({
         host: 'smtp.mandrillapp.com',
         port: 587,
@@ -41,7 +41,6 @@ router.post('/sendmail', function (req, res) {
             res.send(500);
         }
         else {
-            req.userData.emails++;
             res.send(200);
         }
     });
