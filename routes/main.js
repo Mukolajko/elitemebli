@@ -4,7 +4,7 @@ var fs = require('fs');
 var path = require('path');
 var nodeMailer = require('nodemailer');
 var smtpTransport = require('nodemailer-smtp-transport');
-
+var ejs = require('ejs');
 
 /* GET home page. */
 router.get('/', function (req, res) {
@@ -16,34 +16,51 @@ router.get('/popup', function (req, res) {
 });
 
 router.get('/popup/done', function (req, res) {
-    var msg = req.query.status == "200" ? "Листа відправлено. Скоро з вами зв'яжуться." : (req.query.status == "500" ? "Помилка при оброблені запиту. Спробуйте пізніше. Вибачте за незручності." : "Заборонено! Перевищено максимальну кількість надісланих листів.");
+    var msg = req.query.status == "200" ? "Листа відправлено. Скоро з вами зв'яжуться." : (req.query.status == "500" ? "Помилка при оброблені запиту. Спробуйте пізніше. Вибачте за незручності." : "Заборонено!");
     res.render('popup-res', {message: msg});
 });
 
-router.get('/sendmail', function (req, res) {
-    var transport = nodeMailer.createTransport(smtpTransport({
-        host: 'smtp.mandrillapp.com',
-        port: 587,
-        auth: {
-            user: 'borusyuk_kolya@ukr.net',
-            pass: 'azt8WJ0RJBGJQvI-JZQbcg'
-        }
-    }));
-    var mailOptions = {
-        from: "admin@elitemebli.com",
-        to: 'm.borysiuk@svitla.com',
-        subject: 'TEST',
-        text: 'Phone: ' + req.query.phone + '. Name: ' + req.query.name
-    };
-    transport.sendMail(mailOptions, function (err, response) {
-        if (err) {
-            console.log(err);
-            res.send(500);
-        }
-        else {
-            res.send(200);
-        }
-    });
+router.post('/sendmail', function (req, res) {
+    var name = req.body.name || null;
+    var phone = req.body.phone || null;
+    var message = req.body.message || null;
+
+    if (!name || !phone) {
+        res.send(400);
+    }
+    else {
+        //read template. Create JSON object with data. Fill HTML with data and send it.
+        var file = fs.readFileSync(path.join(process.cwd() + '/views/mail.ejs'), 'utf-8');
+        var jsonData = {}
+            jsonData.name = name;
+            jsonData.phone = phone;
+            jsonData.message = message;
+        var html = ejs.render(file, jsonData);
+
+        var transport = nodeMailer.createTransport(smtpTransport({
+            host: 'smtp.mandrillapp.com',
+            port: 587,
+            auth: {
+                user: 'borusyuk_kolya@ukr.net',
+                pass: 'azt8WJ0RJBGJQvI-JZQbcg'
+            }
+        }));
+        var mailOptions = {
+            from: "admin@elitemebli.com",
+            to: 'm.borysiuk@svitla.com',
+            subject: 'Новий запит від клієнта',
+            html: html
+        };
+        transport.sendMail(mailOptions, function (err, response) {
+            if (err) {
+                console.log(err);
+                res.send(500);
+            }
+            else {
+                res.send(200);
+            }
+        });
+    }
 });
 
 router.get('/download', function (req, res) {
