@@ -24,7 +24,7 @@ $(document).ready(function () {
 });
 
 //add animation of pictures in content
-$(document).scroll(function () {
+/*$(document).scroll(function () {
     var position = $(".tasks-moving").position();
     var botCalc = position.top + $('.tasks-moving').outerHeight(true) - $(window).scrollTop();
 
@@ -42,10 +42,10 @@ $(document).scroll(function () {
     if ($(window).scrollTop() < 101 || botCalc < 50) {
         $(".tasks-moving").removeClass("animated");
     }
-});
+});*/
 
 //pop-up form validation and ajax send request
-function sendForm() {
+function validate() {
     $("form > span").remove();
     $("#send-order").attr("disabled", true);
     var errors = 0;
@@ -67,34 +67,49 @@ function sendForm() {
     });
 
     if (errors == 0) {
-        $("#return-content").bPopup().close();
-        $.ajax({
-            url: '/sendmail',
-            type: "POST",
-            data: {name: $("form input[name = 'name']").val(), phone: $("form input[name = 'phone']").val(), message: $("form input[name = 'message']").val()},
-            success: function (responce) {
-                $("#return-content > *").remove();
-                $('#return-content').bPopup({
-                    loadUrl: '/popup/done?status=200', //Uses jQuery.load()
-                    autoClose: 2500
-                });
-            },
-            error: function (responce) {
+        sendForm();
+    }
+    else {
+        $("#send-order").attr("disabled", false);
+    }
+}
+function sendForm() {
+    $.ajax({
+        url: '/sendmail',
+        type: "POST",
+        data: {
+            captcha: $("#g-recaptcha-response").val(),
+            name: $("form input[name = 'name']").val(),
+            phone: $("form input[name = 'phone']").val(),
+            message: $("form input[name = 'message']").val()
+        },
+        success: function (responce) {
+            $("#return-content").bPopup().close();
+            $("#return-content > *").remove();
+            $('#return-content').bPopup({
+                loadUrl: '/popup/done?status=200', //Uses jQuery.load()
+                autoClose: 2500
+            });
+        },
+        error: function (responce) {
+            if (responce.status == 412 ) {
+                $(".g-recaptcha").css({border: "3px solid red"});
+                $("#g-recaptcha-response").after("<span>Підтвердіть що ви не робот</span>");
+                $("#send-order").attr("disabled", false);
+            }
+            else {
+                $("#return-content").bPopup().close();
                 $("#return-content > *").remove();
                 $('#return-content').bPopup({
                     loadUrl: '/popup/done?status=' + responce.status, //Uses jQuery.load()
                     autoClose: 3000
                 });
             }
-        });
-    }
-    else {
-        $("#send-order").attr("disabled", false);
-    }
+        }
+    });
 }
-
 //gmaps init function
-function initialize() {
+/*function initialize() {
     //ternopil tarnavskogo location
     var myLatlng = new google.maps.LatLng(49.564438, 25.632667);
     var myMap = document.getElementById('map');
@@ -115,7 +130,7 @@ function initialize() {
     });
 }
 
-google.maps.event.addDomListener(window, 'load', initialize);
+google.maps.event.addDomListener(window, 'load', initialize);*/
 
 
 $(function () {
